@@ -48,9 +48,6 @@ dependencies {
 
     // content validation
     implementation("io.ktor:ktor-server-request-validation:$ktor_version")
-    // Caching Headers
-
-    // Compression, este era para si quyerias que te entregara un archivo comprimido
 
     // Cors
     implementation("io.ktor:ktor-server-cors-jvm:$ktor_version")
@@ -59,20 +56,17 @@ dependencies {
     implementation("io.ktor:ktor-server-websockets-jvm:$ktor_version")
 
     // Certificados SSL y TSL
+    implementation("io.ktor:ktor-network-tls-certificates:$ktor_version")
 
     // Logg
     implementation("ch.qos.logback:logback-classic:$logbackclassic_version")
     implementation("io.github.microutils:kotlin-logging-jvm:$micrologging_version")
-
-    // Cache 4K para cachear datos de almacenamiento
 
     // Koin
     implementation("io.insert-koin:koin-ktor:$koin_ktor_version")
     implementation("io.insert-koin:koin-logger-slf4j:$koin_ktor_version")
     implementation("io.insert-koin:koin-annotations:$koin_ksp_version")
     ksp("io.insert-koin:koin-ksp-compiler:$koin_ksp_version")
-
-    // Bases de datos
 
     // BCrypt
     implementation("org.mindrot:jbcrypt:$bcrypt_version")
@@ -88,7 +82,6 @@ dependencies {
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutines_version")
 
     implementation("io.ktor:ktor-server-config-yaml:$ktor_version")
-
 }
 sourceSets.main {
     java.srcDirs("build/generated/ksp/main/kotlin")

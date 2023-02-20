@@ -1,6 +1,7 @@
 package com.example.plugins
 
 import com.example.routes.empleadoRoutes
+import com.example.routes.storageRoutes
 import com.example.routes.userRoutes
 import io.ktor.server.application.*
 import io.ktor.server.response.*
@@ -14,4 +15,5 @@ fun Application.configureRouting() {
     }
     empleadoRoutes()
     userRoutes()
+    storageRoutes()
 }
