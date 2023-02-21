@@ -53,6 +53,7 @@ class EmpleadoRepositoryImpl : EmpleadoRepository {
         result?.let {
             empleado.id = id
             empleado.uuid = it.uuid
+            empleado.departamento = it.departamento
             empleados[id] = empleado
             onChange(Notification.Tipo.UPDATE, id, empleado)
             fileService.writeFileEmpleado(empleados)

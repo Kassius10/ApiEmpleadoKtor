@@ -8,6 +8,7 @@ fun EmpleadoCreateDto.toEmpleado(): Empleado {
     return Empleado(
         id = this.id,
         name = this.name,
+        departamento = null,
         available = true
     )
 }
@@ -16,6 +17,7 @@ fun EmpleadoUpdateDto.toEmpleado(): Empleado {
     return Empleado(
         id = null,
         name = this.name,
+        departamento = null,
         available = this.available
     )
 }

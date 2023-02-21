@@ -6,6 +6,7 @@ import com.example.exceptions.EmpleadoException
 import com.example.exceptions.EmpleadoNotFoundException
 import com.example.mappers.toEmpleado
 import com.example.models.Empleado
+import com.example.repositories.departamentos.DepartamentoRepository
 import com.example.repositories.empleados.EmpleadoRepository
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -24,6 +25,7 @@ private const val ENDPOINT = "/empleados"
 
 fun Application.empleadoRoutes() {
     val repository: EmpleadoRepository by inject()
+    val departamentos: DepartamentoRepository by inject()
 
     routing {
         route(ENDPOINT) {
@@ -46,13 +48,35 @@ fun Application.empleadoRoutes() {
                     call.respond(HttpStatusCode.BadRequest, e.message.toString())
                 }
             }
+            get("/{id}/departamento") {
+                try {
+                    val id = call.parameters["id"]!!.toLong()
+                    val result = repository.findById(id)
+                    result?.let {
+                        val departamento = departamentos.findById(it.departamento!!)
+                        departamento?.let {
+                            call.respond(HttpStatusCode.OK, departamento)
+                        }
+                    } ?: call.respond(HttpStatusCode.NotFound, "No existe el empleado con id: $id")
+                } catch (e: NumberFormatException) {
+                    call.respond(HttpStatusCode.BadRequest, e.message.toString())
+                }
+            }
             authenticate {
                 post {
                     try {
                         validateRol()
                         val empleado = call.receive<EmpleadoCreateDto>()
-                        val res = repository.save(empleado.toEmpleado())
-                        call.respond(HttpStatusCode.Created, res)
+                        val departamento = departamentos.findByName(empleado.departamento)
+                        departamento?.let {
+                            val empleadoRes = empleado.toEmpleado()
+                            empleadoRes.departamento = it.id
+                            val res = repository.save(empleadoRes)
+                            call.respond(HttpStatusCode.Created, res)
+                        } ?: call.respond(
+                            HttpStatusCode.NotFound,
+                            "No existe el departamento: ${empleado.departamento}"
+                        )
                     } catch (e: EmpleadoException) {
                         call.respond(HttpStatusCode.BadRequest, e.message.toString())
                     } catch (e: RequestValidationException) {

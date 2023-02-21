@@ -30,6 +30,10 @@ class DepartamentoRepositoryImpl : DepartamentoRepository {
         return departamentos[id]
     }
 
+    override suspend fun findByName(name: String): Departamento? {
+        return departamentos.values.filter { it.name.equals(name) }.firstOrNull()
+    }
+
     override suspend fun save(departamento: Departamento): Departamento {
         val result = departamentos[departamento.id]
         result?.let {

@@ -6,6 +6,7 @@ import kotlinx.serialization.Serializable
 data class EmpleadoCreateDto(
     var id: Long,
     var name: String,
+    var departamento: String,
 )
 
 @Serializable

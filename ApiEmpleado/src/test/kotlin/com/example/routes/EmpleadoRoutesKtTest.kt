@@ -1,9 +1,11 @@
 package com.example.routes
 
+import com.example.dto.DepartamentoCreateDto
 import com.example.dto.EmpleadoCreateDto
 import com.example.dto.EmpleadoUpdateDto
 import com.example.dto.UserLoginDto
 import com.example.models.Empleado
+import com.example.services.FileCsvService
 import io.ktor.client.plugins.auth.*
 import io.ktor.client.plugins.auth.providers.*
 import io.ktor.client.plugins.contentnegotiation.*
@@ -24,15 +26,18 @@ private val json = Json { ignoreUnknownKeys = true }
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
 internal class EmpleadoRoutesKtTest {
+    private val service: FileCsvService get() = FileCsvService()
     private val empleado = Empleado(
         100,
         "044e6ec7-aa6c-46bb-9433-8094ef4ae8bc",
         "empleado",
+        100,
         true
     )
     private val create = EmpleadoCreateDto(
         empleado.id!!,
-        empleado.name
+        empleado.name,
+        departamento = "Cocina"
     )
     private val update = EmpleadoUpdateDto(
         name = "nuevo",
@@ -41,6 +46,10 @@ internal class EmpleadoRoutesKtTest {
     private val loginDto = UserLoginDto(
         username = "pepito123",
         password = "1234",
+    )
+    private val departamento = DepartamentoCreateDto(
+        id = 100,
+        name = "Cocina"
     )
 
     @org.junit.Test
@@ -56,7 +65,7 @@ internal class EmpleadoRoutesKtTest {
     @Order(2)
     fun getIdNotFound() = testApplication {
         environment { config }
-        val response = client.get("/empleados/1")
+        val response = client.get("/empleados/-1")
         assertEquals(HttpStatusCode.NotFound, response.status)
     }
 
@@ -86,17 +95,24 @@ internal class EmpleadoRoutesKtTest {
                 }
             }
         }
+        client.post("/departamentos") {
+            contentType(ContentType.Application.Json)
+            setBody(departamento)
+        }
         response = client.post("/empleados") {
             contentType(ContentType.Application.Json)
             setBody(create)
         }
+        println(response.bodyAsText())
         assertEquals(response.status, HttpStatusCode.Created)
         val res = json.decodeFromString<Empleado>(response.bodyAsText())
+
 
         assertAll(
             { assertEquals(empleado.name, res.name) },
             { assertEquals(empleado.available, res.available) }
         )
+        service.clean()
     }
 
     @org.junit.Test
@@ -125,6 +141,10 @@ internal class EmpleadoRoutesKtTest {
                 }
             }
         }
+        client.post("/departamentos") {
+            contentType(ContentType.Application.Json)
+            setBody(departamento)
+        }
         response = client.post("/empleados") {
             contentType(ContentType.Application.Json)
             setBody(create)
@@ -144,7 +164,7 @@ internal class EmpleadoRoutesKtTest {
             { assertEquals(update.name, dto.name) },
             { assertEquals(update.available, dto.available) }
         )
-
+        service.clean()
     }
 
     @org.junit.Test
@@ -206,6 +226,10 @@ internal class EmpleadoRoutesKtTest {
                 }
             }
         }
+        client.post("/departamentos") {
+            contentType(ContentType.Application.Json)
+            setBody(departamento)
+        }
         response = client.post("/empleados") {
             contentType(ContentType.Application.Json)
             setBody(create)
@@ -215,6 +239,7 @@ internal class EmpleadoRoutesKtTest {
         response = client.delete("/empleados/${res.id}")
 
         assertEquals(HttpStatusCode.NoContent, response.status)
+        service.clean()
     }
 
     @org.junit.Test

@@ -7,6 +7,7 @@ import com.example.exceptions.DepartamentoNotFoundException
 import com.example.mappers.toDepartamento
 import com.example.models.Departamento
 import com.example.repositories.departamentos.DepartamentoRepository
+import com.example.repositories.empleados.EmpleadoRepository
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -18,12 +19,14 @@ import io.ktor.server.routing.*
 import io.ktor.server.websocket.*
 import io.ktor.util.pipeline.*
 import io.ktor.websocket.*
+import kotlinx.coroutines.flow.toList
 import org.koin.ktor.ext.inject
 
 private const val ENDPOINT = "/departamentos"
 
 fun Application.departamentoRoutes() {
     val repository: DepartamentoRepository by inject()
+    val empleados: EmpleadoRepository by inject()
     routing {
         route(ENDPOINT) {
             get {
@@ -40,6 +43,18 @@ fun Application.departamentoRoutes() {
                     val result = repository.findById(id)
                     result?.let {
                         call.respond(HttpStatusCode.OK, it)
+                    } ?: call.respond(HttpStatusCode.NotFound, "No existe el departamento con id: $id")
+                } catch (e: NumberFormatException) {
+                    call.respond(HttpStatusCode.BadRequest, e.message.toString())
+                }
+            }
+            get("/{id}/empleados") {
+                try {
+                    val id = call.parameters["id"]!!.toLong()
+                    val result = repository.findById(id)
+                    result?.let { departamento ->
+                        val empleados = empleados.findAll().toList().filter { it.departamento == departamento.id }
+                        call.respond(HttpStatusCode.OK, empleados)
                     } ?: call.respond(HttpStatusCode.NotFound, "No existe el departamento con id: $id")
                 } catch (e: NumberFormatException) {
                     call.respond(HttpStatusCode.BadRequest, e.message.toString())

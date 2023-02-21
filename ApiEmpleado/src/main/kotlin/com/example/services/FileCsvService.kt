@@ -8,9 +8,9 @@ import java.io.File
 @Single
 class FileCsvService {
     private val empleados = mutableMapOf(
-        1L to Empleado(id = 1L, name = "Dani", available = true),
-        2L to Empleado(id = 2L, name = "Nuria", available = false),
-        3L to Empleado(id = 3L, name = "Aura", available = true)
+        1L to Empleado(id = 1L, name = "Dani", departamento = 1L, available = true),
+        2L to Empleado(id = 2L, name = "Nuria", departamento = 1L, available = false),
+        3L to Empleado(id = 3L, name = "Aura", departamento = 2L, available = true)
     )
     private val departamentos = mutableMapOf(
         1L to Departamento(id = 1L, name = "Desarrollo"),
@@ -32,7 +32,7 @@ class FileCsvService {
 
     fun writeFileEmpleado(empleados: MutableMap<Long, Empleado>) {
         File(fileEmpleado).bufferedWriter().use {
-            it.write("id;uuid;name;available")
+            it.write("id;uuid;name;departamentoID;available")
             empleados.forEach { key ->
                 it.append("\n" + key.value.toString(";"))
             }
@@ -64,7 +64,8 @@ class FileCsvService {
                     field[0].toLong(),
                     field[1],
                     field[2],
-                    field[3].toBoolean()
+                    field[3].toLong(),
+                    field[4].toBoolean()
                 )
                 empleados.put(empleado.id!!, empleado)
             }
@@ -83,5 +84,11 @@ class FileCsvService {
                 departamentos.put(departamento.id!!, departamento)
             }
         return departamentos
+    }
+
+    fun clean() {
+        println("Limpiando")
+        writeFileDepartamento(departamentos)
+        writeFileEmpleado(empleados)
     }
 }

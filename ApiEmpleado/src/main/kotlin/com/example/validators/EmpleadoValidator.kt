@@ -10,6 +10,8 @@ fun RequestValidationConfig.empleadoValidation() {
             ValidationResult.Invalid("El nombre no puede estar vacio.")
         } else if (empleado.id <= 0) {
             ValidationResult.Invalid("La id no puede ser igual o inferior a cero.")
+        } else if (empleado.departamento.isBlank()) {
+            ValidationResult.Invalid("El departamento no puede estar vacio.")
         } else {
             ValidationResult.Valid
         }
