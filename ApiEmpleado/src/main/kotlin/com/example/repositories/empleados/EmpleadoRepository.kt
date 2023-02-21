@@ -1,4 +1,4 @@
-package com.example.repositories
+package com.example.repositories.empleados
 
 import com.example.models.Empleado
 import com.example.models.Notification

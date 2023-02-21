@@ -1,12 +1,12 @@
 package com.example.routes
 
-import com.example.dto.EmpleadoCreateDto
-import com.example.dto.EmpleadoUpdateDto
-import com.example.exceptions.EmpleadoException
-import com.example.exceptions.EmpleadoNotFoundException
-import com.example.mappers.toEmpleado
-import com.example.models.Empleado
-import com.example.repositories.empleados.EmpleadoRepository
+import com.example.dto.DepartamentoCreateDto
+import com.example.dto.DepartamentoUpdateDto
+import com.example.exceptions.DepartamentoBadRequestException
+import com.example.exceptions.DepartamentoNotFoundException
+import com.example.mappers.toDepartamento
+import com.example.models.Departamento
+import com.example.repositories.departamentos.DepartamentoRepository
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -20,20 +20,19 @@ import io.ktor.util.pipeline.*
 import io.ktor.websocket.*
 import org.koin.ktor.ext.inject
 
-private const val ENDPOINT = "/empleados"
+private const val ENDPOINT = "/departamentos"
 
-fun Application.empleadoRoutes() {
-    val repository: EmpleadoRepository by inject()
-
+fun Application.departamentoRoutes() {
+    val repository: DepartamentoRepository by inject()
     routing {
         route(ENDPOINT) {
             get {
-                val empleados = mutableListOf<Empleado>()
+                val departamentos = mutableListOf<Departamento>()
 
                 repository.findAll().collect {
-                    empleados.add(it)
+                    departamentos.add(it)
                 }
-                call.respond(HttpStatusCode.OK, empleados)
+                call.respond(HttpStatusCode.OK, departamentos)
             }
             get("/{id}") {
                 try {
@@ -41,7 +40,7 @@ fun Application.empleadoRoutes() {
                     val result = repository.findById(id)
                     result?.let {
                         call.respond(HttpStatusCode.OK, it)
-                    } ?: call.respond(HttpStatusCode.NotFound, "No existe el empleado con id: $id")
+                    } ?: call.respond(HttpStatusCode.NotFound, "No existe el departamento con id: $id")
                 } catch (e: NumberFormatException) {
                     call.respond(HttpStatusCode.BadRequest, e.message.toString())
                 }
@@ -50,38 +49,25 @@ fun Application.empleadoRoutes() {
                 post {
                     try {
                         validateRol()
-                        val empleado = call.receive<EmpleadoCreateDto>()
-                        val res = repository.save(empleado.toEmpleado())
+                        val departamento = call.receive<DepartamentoCreateDto>()
+                        val res = repository.save(departamento.toDepartamento())
                         call.respond(HttpStatusCode.Created, res)
-                    } catch (e: EmpleadoException) {
+                    } catch (e: DepartamentoBadRequestException) {
                         call.respond(HttpStatusCode.BadRequest, e.message.toString())
                     } catch (e: RequestValidationException) {
                         call.respond(HttpStatusCode.BadRequest, e.reasons)
-                    }
-                }
-                delete("/{id}") {
-                    try {
-                        validateRol()
-                        val id = call.parameters["id"]!!.toLong()
-                        val result = repository.findById(id)
-                        result?.let {
-                            repository.delete(it)
-                            call.respond(HttpStatusCode.NoContent)
-                        } ?: call.respond(HttpStatusCode.NotFound, "No existe el empleado con id: $id")
-                    } catch (e: NumberFormatException) {
-                        call.respond(HttpStatusCode.BadRequest, e.message.toString())
                     }
                 }
                 put("/{id}") {
                     try {
                         validateRol()
                         val id = call.parameters["id"]!!.toLong()
-                        val empleado = call.receive<EmpleadoUpdateDto>()
-                        val result = repository.update(id, empleado.toEmpleado())
+                        val departamento = call.receive<DepartamentoUpdateDto>()
+                        val result = repository.update(id, departamento.toDepartamento())
                         call.respond(HttpStatusCode.OK, result)
                     } catch (e: NumberFormatException) {
                         call.respond(HttpStatusCode.BadRequest, e.message.toString())
-                    } catch (e: EmpleadoNotFoundException) {
+                    } catch (e: DepartamentoNotFoundException) {
                         call.respond(HttpStatusCode.NotFound, e.message.toString())
                     } catch (e: RequestValidationException) {
                         call.respond(HttpStatusCode.BadRequest, e.reasons)
@@ -89,13 +75,12 @@ fun Application.empleadoRoutes() {
                 }
             }
         }
-
-        webSocket("/updates/empleados") {
+        webSocket("/updates/departamentos") {
             try {
                 repository.addSuscriptor(this.hashCode()) {
                     sendSerialized(it)
                 }
-                sendSerialized("Updates Web Socket: Empleado")
+                sendSerialized("Updates Web Socket: Departamento")
                 for (frame in incoming) {
                     if (frame.frameType == FrameType.CLOSE) {
                         break

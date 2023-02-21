@@ -1,10 +1,7 @@
 package com.example.services
 
+import com.example.models.Departamento
 import com.example.models.Empleado
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Single
 import java.io.File
 
@@ -15,21 +12,26 @@ class FileCsvService {
         2L to Empleado(id = 2L, name = "Nuria", available = false),
         3L to Empleado(id = 3L, name = "Aura", available = true)
     )
+    private val departamentos = mutableMapOf(
+        1L to Departamento(id = 1L, name = "Desarrollo"),
+        2L to Departamento(id = 2L, name = "Administración")
+    )
     private val dir: String = System.getProperty("user.dir") + File.separator + "data"
-    private val file: String = dir + File.separator + "data.csv"
+    private val fileEmpleado: String = dir + File.separator + "dataEmpleado.csv"
+    private val fileDepartamento: String = dir + File.separator + "dataDepartamento.csv"
 
     init {
         if (!File(dir).exists()) {
             File(dir).mkdir()
-            File(file).createNewFile()
-            CoroutineScope(Dispatchers.IO).launch {
-                writeFile(empleados)
-            }
+            File(fileEmpleado).createNewFile()
+            File(fileDepartamento).createNewFile()
+            writeFileEmpleado(empleados)
+            writeFileDepartamento(departamentos)
         }
     }
 
-    suspend fun writeFile(empleados: MutableMap<Long, Empleado>) = withContext(Dispatchers.IO) {
-        File(file).bufferedWriter().use {
+    fun writeFileEmpleado(empleados: MutableMap<Long, Empleado>) {
+        File(fileEmpleado).bufferedWriter().use {
             it.write("id;uuid;name;available")
             empleados.forEach { key ->
                 it.append("\n" + key.value.toString(";"))
@@ -37,13 +39,26 @@ class FileCsvService {
         }
     }
 
-    suspend fun writeEmpleado(empleado: Empleado) = withContext(Dispatchers.IO) {
-        File(file).appendText("\n" + empleado.toString(";"))
+    fun writeFileDepartamento(departamentos: MutableMap<Long, Departamento>) {
+        File(fileDepartamento).bufferedWriter().use {
+            it.write("id;uuid;name")
+            departamentos.forEach { key ->
+                it.append("\n" + key.value.toString(";"))
+            }
+        }
     }
 
-    suspend fun readFile(): MutableMap<Long, Empleado> = withContext(Dispatchers.IO) {
+    fun writeEmpleado(empleado: Empleado) {
+        File(fileEmpleado).appendText("\n" + empleado.toString(";"))
+    }
+
+    fun writeDepartamento(departamento: Departamento) {
+        File(fileDepartamento).appendText("\n" + departamento.toString(";"))
+    }
+
+    fun readFileEmpleado(): MutableMap<Long, Empleado> {
         val empleados = mutableMapOf<Long, Empleado>()
-        File(file).readLines().drop(1).map { it.split(";") }
+        File(fileEmpleado).readLines().drop(1).map { it.split(";") }
             .map { field ->
                 val empleado = Empleado(
                     field[0].toLong(),
@@ -53,6 +68,20 @@ class FileCsvService {
                 )
                 empleados.put(empleado.id!!, empleado)
             }
-        return@withContext empleados
+        return empleados
+    }
+
+    fun readFileDepartamento(): MutableMap<Long, Departamento> {
+        val departamentos = mutableMapOf<Long, Departamento>()
+        File(fileDepartamento).readLines().drop(1).map { it.split(";") }
+            .map { field ->
+                val departamento = Departamento(
+                    field[0].toLong(),
+                    field[1],
+                    field[2]
+                )
+                departamentos.put(departamento.id!!, departamento)
+            }
+        return departamentos
     }
 }

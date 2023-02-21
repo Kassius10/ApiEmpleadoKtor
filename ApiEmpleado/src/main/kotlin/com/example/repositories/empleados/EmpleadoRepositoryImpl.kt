@@ -1,4 +1,4 @@
-package com.example.repositories
+package com.example.repositories.empleados
 
 import com.example.exceptions.EmpleadoBadRequestException
 import com.example.exceptions.EmpleadoNotFoundException
@@ -19,9 +19,7 @@ class EmpleadoRepositoryImpl : EmpleadoRepository {
     private val suscriptores = mutableMapOf<Int, suspend (Notification<Empleado>) -> Unit>()
 
     init {
-        CoroutineScope(Dispatchers.IO).launch {
-            empleados = fileService.readFile()
-        }
+        empleados = fileService.readFileEmpleado()
     }
 
     override suspend fun findAll(): Flow<Empleado> {
@@ -46,7 +44,7 @@ class EmpleadoRepositoryImpl : EmpleadoRepository {
     override suspend fun delete(empleado: Empleado): Boolean {
         return empleados.remove(empleado.id).also {
             onChange(Notification.Tipo.DELETE, empleado.id!!, empleado)
-            fileService.writeFile(empleados)
+            fileService.writeFileEmpleado(empleados)
         }.let { true }
     }
 
@@ -57,7 +55,7 @@ class EmpleadoRepositoryImpl : EmpleadoRepository {
             empleado.uuid = it.uuid
             empleados[id] = empleado
             onChange(Notification.Tipo.UPDATE, id, empleado)
-            fileService.writeFile(empleados)
+            fileService.writeFileEmpleado(empleados)
             return empleado
         } ?: throw EmpleadoNotFoundException("No existe el empleado con id: $id")
     }

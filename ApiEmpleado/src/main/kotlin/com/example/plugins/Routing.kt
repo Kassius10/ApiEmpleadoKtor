@@ -1,5 +1,6 @@
 package com.example.plugins
 
+import com.example.routes.departamentoRoutes
 import com.example.routes.empleadoRoutes
 import com.example.routes.storageRoutes
 import com.example.routes.userRoutes
@@ -14,6 +15,7 @@ fun Application.configureRouting() {
         }
     }
     empleadoRoutes()
+    departamentoRoutes()
     userRoutes()
     storageRoutes()
 }
