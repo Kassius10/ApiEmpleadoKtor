@@ -2,8 +2,6 @@ package com.example.services.storage
 
 import com.example.config.StorageConfig
 import com.example.exceptions.StorageFileNotFoundException
-import io.ktor.util.cio.*
-import io.ktor.utils.io.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Single
@@ -32,18 +30,6 @@ class StorageServiceImpl(
                 "fileName" to fileName,
                 "createAt" to LocalDateTime.now().toString(),
                 "size" to fileBytes.size.toString(),
-                "secureUrl" to storageConfig.secureUrl + "/" + storageConfig.endpoint + "/" + fileName,
-            )
-        }
-
-    override suspend fun saveFile(fileName: String, fileBytes: ByteReadChannel): Map<String, String> =
-        withContext(Dispatchers.IO) {
-            val file = File(storageConfig.uploadDir + File.separator + fileName)
-            val res = fileBytes.copyAndClose(file.writeChannel())
-            return@withContext mapOf(
-                "fileName" to fileName,
-                "createAt" to LocalDateTime.now().toString(),
-                "size" to res.toString(),
                 "secureUrl" to storageConfig.secureUrl + "/" + storageConfig.endpoint + "/" + fileName,
             )
         }

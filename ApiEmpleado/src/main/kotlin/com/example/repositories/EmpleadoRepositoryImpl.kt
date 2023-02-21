@@ -19,7 +19,9 @@ class EmpleadoRepositoryImpl : EmpleadoRepository {
     private val suscriptores = mutableMapOf<Int, suspend (Notification<Empleado>) -> Unit>()
 
     init {
-        empleados = fileService.readFile()
+        CoroutineScope(Dispatchers.IO).launch {
+            empleados = fileService.readFile()
+        }
     }
 
     override suspend fun findAll(): Flow<Empleado> {

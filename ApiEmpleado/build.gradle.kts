@@ -2,6 +2,9 @@ val ktor_version: String by project
 val kotlin_version: String by project
 val logbackclassic_version: String by project
 val micrologging_version: String by project
+
+val junit_version: String by project
+val mockk_version: String by project
 val coroutines_version: String by project
 
 val koin_ktor_version: String by project
@@ -66,6 +69,7 @@ dependencies {
     implementation("io.insert-koin:koin-ktor:$koin_ktor_version")
     implementation("io.insert-koin:koin-logger-slf4j:$koin_ktor_version")
     implementation("io.insert-koin:koin-annotations:$koin_ksp_version")
+    implementation("io.ktor:ktor-client-auth:2.2.3")
     ksp("io.insert-koin:koin-ksp-compiler:$koin_ksp_version")
 
     // BCrypt
@@ -74,12 +78,18 @@ dependencies {
     // test
     testImplementation("io.ktor:ktor-server-tests-jvm:$ktor_version")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
+
     // JUnit 5 en vez del por defecto de Kotlin...
+    testImplementation("org.junit.jupiter:junit-jupiter-api:$junit_version")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:$junit_version")
 
     // MockK para testear Mockito con Kotlin
+    testImplementation("io.mockk:mockk:$mockk_version")
 
     // Para testear métodos suspendidos o corrutinas
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutines_version")
+
+    testImplementation("io.ktor:ktor-client-content-negotiation:$ktor_version")
 
     implementation("io.ktor:ktor-server-config-yaml:$ktor_version")
 }

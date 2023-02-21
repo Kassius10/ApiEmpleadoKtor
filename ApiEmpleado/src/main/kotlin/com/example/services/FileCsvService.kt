@@ -1,6 +1,10 @@
 package com.example.services
 
 import com.example.models.Empleado
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Single
 import java.io.File
 
@@ -18,11 +22,13 @@ class FileCsvService {
         if (!File(dir).exists()) {
             File(dir).mkdir()
             File(file).createNewFile()
-            writeFile(empleados)
+            CoroutineScope(Dispatchers.IO).launch {
+                writeFile(empleados)
+            }
         }
     }
 
-    fun writeFile(empleados: MutableMap<Long, Empleado>) {
+    suspend fun writeFile(empleados: MutableMap<Long, Empleado>) = withContext(Dispatchers.IO) {
         File(file).bufferedWriter().use {
             it.write("id;uuid;name;available")
             empleados.forEach { key ->
@@ -31,11 +37,11 @@ class FileCsvService {
         }
     }
 
-    fun writeEmpleado(empleado: Empleado) {
+    suspend fun writeEmpleado(empleado: Empleado) = withContext(Dispatchers.IO) {
         File(file).appendText("\n" + empleado.toString(";"))
     }
 
-    fun readFile(): MutableMap<Long, Empleado> {
+    suspend fun readFile(): MutableMap<Long, Empleado> = withContext(Dispatchers.IO) {
         val empleados = mutableMapOf<Long, Empleado>()
         File(file).readLines().drop(1).map { it.split(";") }
             .map { field ->
@@ -47,6 +53,6 @@ class FileCsvService {
                 )
                 empleados.put(empleado.id!!, empleado)
             }
-        return empleados
+        return@withContext empleados
     }
 }
